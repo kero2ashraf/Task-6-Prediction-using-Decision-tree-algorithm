@@ -1,0 +1,99 @@
+%matplotlib inline
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+from sklearn import tree
+
+df = pd.read_csv(r"C:/Users/dell/Downloads/Iris.csv")
+df
+df.info()
+features = ['SepalLengthCm','SepalWidthCm','PetalLengthCm','PetalWidthCm']
+
+# Create features matrix
+x = df.loc[:, features].values
+y = df.Species
+x_train,x_test,y_train,y_test = train_test_split(x,y,random_state=0)
+clf = DecisionTreeClassifier(max_depth=2,random_state=0)
+clf.fit(x_train,y_train)
+clf.predict(x_test[0:1])
+
+from sklearn import metrics
+import seaborn as sns
+
+score = clf.score(x_test, y_test)
+print(score)
+print(metrics.classification_report(y_test,clf.predict(x_test)))
+
+cm = metrics.confusion_matrix(y_test, clf.predict(x_test))
+
+plt.figure(figsize=(7,7))
+sns.heatmap(cm, annot=True,
+            fmt=".0f",
+            linewidths=.5,
+            square = True,
+            cmap = 'Blues');
+plt.ylabel('Actual label', fontsize = 17);
+plt.xlabel('Predicted label', fontsize = 17);
+plt.title('Accuracy Score: {}'.format(score), size = 17);
+plt.tick_params(labelsize= 15)
+
+# List of values to try for max_depth:
+max_depth_range = list(range(1, 6))
+
+# List to store the average RMSE for each value of max_depth:
+accuracy = []
+
+for depth in max_depth_range:
+    
+    clf = DecisionTreeClassifier(max_depth = depth, 
+                             random_state = 0)
+    clf.fit(x_train, y_train)
+
+    score = clf.score(x_test, y_test)
+    accuracy.append(score)
+#ploting accuracy score depth wise
+fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize = (10,7));
+
+ax.plot(max_depth_range,
+        accuracy,
+        lw=2,
+        color='k')
+
+ax.set_xlim([1, 5])
+ax.set_ylim([.50, 1.00])
+ax.grid(True,
+        axis = 'both',
+        zorder = 0,
+        linestyle = ':',
+        color = 'k')
+
+
+ax.tick_params(labelsize = 18)
+ax.set_xticks([1,2,3,4,5])
+ax.set_xlabel('max_depth', fontsize = 24)
+ax.set_ylabel('Accuracy', fontsize = 24)
+fig.tight_layout()
+#fig.savefig('images/max_depth_vs_accuracy.png', dpi = 300)
+
+fig, axes = plt.subplots(nrows = 1, ncols = 1, figsize = (7,4), dpi = 150)
+
+tree.plot_tree(clf);
+
+# Putting the feature names and class names into variables
+fn = ['sepal length (cm)','sepal width (cm)','petal length (cm)','petal width (cm)']
+cn = ['setosa', 'versicolor', 'virginica']
+
+
+fig, axes = plt.subplots(nrows = 1, ncols = 1, figsize = (7,4), dpi = 300)
+
+tree.plot_tree(clf,
+               feature_names = fn, 
+               class_names=cn,
+               filled = True);
+#fig.savefig('images/plottreefncn.png')
+
